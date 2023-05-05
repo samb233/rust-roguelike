@@ -1,0 +1,6 @@
+#+title: rust-roguelike
+
+* Rust-Roguelike
+My following of the book [[https://bfnightly.bracketproductions.com/rustbook/chapter_0.html][Roguelike Tutorial - In Rust]]
+
+I found it's a good way to learn a coding language to build something you interested in.
