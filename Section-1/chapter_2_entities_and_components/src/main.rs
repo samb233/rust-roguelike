@@ -17,6 +17,32 @@ struct Renderable {
 }
 
 #[derive(Component)]
+struct Player {}
+
+fn move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
+    let mut position = ecs.write_storage::<Position>();
+    let mut player = ecs.write_storage::<Player>();
+
+    for (_player, pos) in (&mut player, &mut position).join() {
+        pos.x = min(79, max(0, pos.x + delta_x));
+        pos.y = min(39, max(0, pos.y + delta_y));
+    }
+}
+
+fn player_input(gs: &mut State, ctx: &mut Rltk) {
+    match ctx.key {
+        None => {}
+        Some(key) => match key {
+            VirtualKeyCode::Left => move_player(-1, 0, &mut gs.ecs),
+            VirtualKeyCode::Right => move_player(1, 0, &mut gs.ecs),
+            VirtualKeyCode::Up => move_player(0, -1, &mut gs.ecs),
+            VirtualKeyCode::Down => move_player(0, 1, &mut gs.ecs),
+            _ => {}
+        },
+    }
+}
+
+#[derive(Component)]
 struct LeftMover {}
 
 struct LeftWalker {}
@@ -50,6 +76,7 @@ impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
         ctx.cls();
         self.run_system();
+        player_input(self, ctx);
 
         let position = self.ecs.read_storage::<Position>();
         let renderable = self.ecs.read_storage::<Renderable>();
@@ -69,6 +96,7 @@ fn main() -> rltk::BError {
     let mut gs = State { ecs: World::new() };
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
+    gs.ecs.register::<Player>();
     gs.ecs.register::<LeftMover>();
 
     gs.ecs
@@ -79,6 +107,7 @@ fn main() -> rltk::BError {
             fg: RGB::named(rltk::YELLOW),
             bg: RGB::named(rltk::BLACK),
         })
+        .with(Player {})
         .build();
 
     for i in 0..10 {
